@@ -3,28 +3,25 @@
  * (challenge–response, sem criptografia).
  *
  * O SDK faz todo o trabalho: pede um desafio, repassa ao seu `signer`, troca a
- * assinatura pelo tokenJWT e o guarda. O host só precisa assinar a string com a
- * carteira (aqui: Solana / Ed25519). Não há ProtocolEncryptor nem chave pública
- * envolvida — a única prova é a assinatura.
+ * assinatura pelo tokenJWT e o guarda. O host só assina a string com a carteira
+ * (aqui: Solana / Ed25519).
  *
- * Variáveis de ambiente:
- *   PAGFINANCE_BASE_URL   host da API (default: https://app.pag.finance)
- *   SOLANA_SECRET_KEY     secret key base58 (64 bytes, ex.: export do Phantom).
- *                         Se ausente, gera um par efêmero (sem KYC).
- *
- * Execução:
+ * Ajuste as constantes abaixo e rode:
  *   pnpm --filter @pagfinance/sdk-example-auth-token start
  */
 import nacl from 'tweetnacl';
 import bs58 from 'bs58';
 import { PagFinanceClient, PagFinanceError } from '@pagfinance/sdk';
 
-const { PAGFINANCE_BASE_URL = 'https://app.pag.finance', SOLANA_SECRET_KEY } = process.env;
+// ── Configuração (edite estes valores) ──────────────────────────────────────
+const PAGFINANCE_BASE_URL = 'https://app.pag.finance';
+const SOLANA_SECRET_KEY = ''; // base58 (64 bytes, ex.: export do Phantom). Vazio = par efêmero
 const BLOCKCHAIN = 'solana';
+// ─────────────────────────────────────────────────────────────────────────────
 
 function loadKeypair(): nacl.SignKeyPair {
   if (SOLANA_SECRET_KEY) return nacl.sign.keyPair.fromSecretKey(bs58.decode(SOLANA_SECRET_KEY));
-  console.log('⚠️  SOLANA_SECRET_KEY ausente — gerando par efêmero (sem KYC).');
+  console.log('⚠️  SOLANA_SECRET_KEY vazio — gerando par efêmero (sem KYC).');
   return nacl.sign.keyPair();
 }
 
@@ -60,5 +57,4 @@ main().catch((e) => {
   } else {
     console.error(e);
   }
-  process.exit(1);
 });
