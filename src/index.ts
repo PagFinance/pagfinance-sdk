@@ -27,6 +27,7 @@ export {
 export {
   AuthResource,
   type EncryptedAuthEnvelope,
+  type AuthLoginOptions,
   type AuthLoginResult,
 } from './resources/AuthResource';
 export { AssetsResource } from './resources/AssetsResource';

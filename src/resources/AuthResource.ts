@@ -3,13 +3,23 @@ import { type ResolvedConfig } from '../config';
 import { type RegistrationType, type AuthorizedWallet } from '../types/kyc';
 
 /**
- * Envelope JÁ criptografado (ProtocolEncryptor v0.2) produzido pelo app host.
- * A SDK NÃO criptografa nem assina — apenas transporta.
+ * Envelope JÁ criptografado (ProtocolEncryptor v0.2 / AES-256-CBC) produzido
+ * pelo app host. A SDK NÃO criptografa nem assina — apenas transporta.
+ * Formato idêntico ao `EncryptedDataType` do app: `{ v, iv, encryptedData }`.
  */
 export interface EncryptedAuthEnvelope {
   v: number;
   iv: string;
-  data: string;
+  encryptedData: string;
+  authTag?: string;
+}
+
+/** Headers opcionais aceitos por `/api/auth`. */
+export interface AuthLoginOptions {
+  blockchain?: string;
+  loginProvider?: 'login-wallet' | 'login-email';
+  /** Firebase ID token, para vincular a sessão Web3 a um usuário Firebase. */
+  idToken?: string;
 }
 
 export interface AuthLoginResult {
@@ -40,11 +50,19 @@ export class AuthResource {
    * Faz login enviando o envelope criptografado pelo host. Em caso de sucesso,
    * persiste o `tokenJWT` no `tokenStore`.
    */
-  async login(envelope: EncryptedAuthEnvelope): Promise<AuthLoginResult> {
+  async login(
+    envelope: EncryptedAuthEnvelope,
+    options: AuthLoginOptions = {},
+  ): Promise<AuthLoginResult> {
     const result = await this.http.request<AuthLoginResult>('/api/auth', {
       method: 'POST',
       skipAuth: true,
       body: envelope,
+      headers: {
+        blockchain: options.blockchain ?? this.config.defaultBlockchain,
+        'login-provider': options.loginProvider ?? 'login-wallet',
+        'id-token': options.idToken,
+      },
     });
     if (result?.tokenJWT) this.config.tokenStore.set(result.tokenJWT);
     return result;
