@@ -2,55 +2,121 @@ import { type HttpClient } from '../http/HttpClient';
 import { type ResolvedConfig } from '../config';
 import { type RegistrationType, type AuthorizedWallet } from '../types/kyc';
 
-/**
- * Envelope JÁ criptografado (ProtocolEncryptor v0.2) produzido pelo app host.
- * A SDK NÃO criptografa nem assina — apenas transporta.
- */
-export interface EncryptedAuthEnvelope {
-  v: number;
-  iv: string;
-  data: string;
-}
-
 export interface AuthLoginResult {
   tokenJWT: string;
   registration?: RegistrationType[];
   authorizedWallets?: AuthorizedWallet[];
   isCurrentWalletAuthorized?: boolean;
-  firebaseUid?: string;
-  uid?: string;
+  firebaseUid?: string | null;
+  uid?: string | null;
+}
+
+/** Desafio devolvido por `/api/auth/challenge`. */
+export interface AuthChallenge {
+  /** String que o cliente deve assinar com a carteira. */
+  challenge: string;
+  /** Blob opaco (HMAC) que deve ser devolvido em `verify`. */
+  state: string;
+  /** Epoch (s) em que o desafio expira. */
+  expiresAt: number;
+}
+
+/** Assinatura produzida pela carteira (bytes ou string, conforme a chain). */
+export type WalletSignature = string | number[] | Uint8Array;
+
+/**
+ * Callback fornecido pelo app host: recebe o `challenge` e devolve a assinatura
+ * da carteira. É a ÚNICA peça de cripto fora do servidor.
+ */
+export type WalletSigner = (
+  challenge: string,
+) => Promise<WalletSignature> | WalletSignature;
+
+export interface SignInParams {
+  address: string;
+  blockchain: string;
+  /** Necessário em algumas chains (ex.: XRPL). */
+  publicKey?: string;
+  /** Firebase ID token para vincular a sessão Web3 a um usuário Firebase. */
+  idToken?: string;
 }
 
 /**
- * Autenticação Web3. A criptografia e a assinatura da carteira ficam FORA da
- * SDK (responsabilidade do app host). A SDK só:
- *  - transporta o envelope cifrado para `/api/auth`;
- *  - guarda o `tokenJWT` resultante no `tokenStore`;
- *  - (opcional) registra um re-login transparente em respostas 401.
+ * Autenticação Web3 via challenge–response (estilo SIWS), sem criptografia.
+ *
+ * Fluxo encapsulado em uma chamada:
+ * ```ts
+ * const { tokenJWT } = await client.auth.signIn(
+ *   { address, blockchain: 'solana' },
+ *   (challenge) => wallet.signMessage(new TextEncoder().encode(challenge)),
+ * );
+ * ```
+ * O SDK chama `/challenge`, repassa o desafio ao `signer`, chama `/verify` e
+ * guarda o `tokenJWT`. Toda a lógica (nonce, verificação, emissão) vive no
+ * servidor — o mesmo contrato vale para o app hoje ou um BFF dedicado amanhã.
  */
 export class AuthResource {
-  private reloginProvider: (() => Promise<EncryptedAuthEnvelope | null>) | null = null;
-
   constructor(
     private readonly http: HttpClient,
     private readonly config: ResolvedConfig,
   ) {}
 
-  /**
-   * Faz login enviando o envelope criptografado pelo host. Em caso de sucesso,
-   * persiste o `tokenJWT` no `tokenStore`.
-   */
-  async login(envelope: EncryptedAuthEnvelope): Promise<AuthLoginResult> {
-    const result = await this.http.request<AuthLoginResult>('/api/auth', {
+  /** Passo 1: obtém um desafio para assinar. */
+  challenge(params: { address: string; blockchain?: string }): Promise<AuthChallenge> {
+    return this.http.request<AuthChallenge>('/api/auth/challenge', {
       method: 'POST',
       skipAuth: true,
-      body: envelope,
+      body: {
+        address: params.address,
+        blockchain: params.blockchain ?? this.config.defaultBlockchain,
+      },
     });
+  }
+
+  /** Passo 2: troca a assinatura pelo tokenJWT (e o persiste). */
+  async verify(params: {
+    address: string;
+    blockchain?: string;
+    signature: WalletSignature;
+    state: string;
+    publicKey?: string;
+    idToken?: string;
+  }): Promise<AuthLoginResult> {
+    const signature =
+      params.signature instanceof Uint8Array ? Array.from(params.signature) : params.signature;
+
+    const result = await this.http.request<AuthLoginResult>('/api/auth/verify', {
+      method: 'POST',
+      skipAuth: true,
+      body: {
+        address: params.address,
+        blockchain: params.blockchain ?? this.config.defaultBlockchain,
+        signature,
+        state: params.state,
+        publicKey: params.publicKey,
+      },
+      headers: { 'id-token': params.idToken },
+    });
+
     if (result?.tokenJWT) this.config.tokenStore.set(result.tokenJWT);
     return result;
   }
 
-  /** Define manualmente o tokenJWT (obtido fora da SDK). */
+  /** Fluxo completo: challenge → assina → verify. */
+  async signIn(params: SignInParams, signer: WalletSigner): Promise<AuthLoginResult> {
+    const ch = await this.challenge({ address: params.address, blockchain: params.blockchain });
+    const signature = await signer(ch.challenge);
+    return this.verify({
+      address: params.address,
+      blockchain: params.blockchain,
+      signature,
+      state: ch.state,
+      publicKey: params.publicKey,
+      idToken: params.idToken,
+    });
+  }
+
+  /** Define manualmente o tokenJWT (obtido fora do SDK). */
   setToken(token: string | null): void {
     this.config.tokenStore.set(token);
   }
@@ -66,23 +132,11 @@ export class AuthResource {
   }
 
   /**
-   * Habilita re-login transparente em 401. O `provider` deve devolver um novo
-   * envelope criptografado (assinando a carteira novamente no host) ou `null`.
+   * Habilita re-login transparente em 401. O `relogin` deve refazer o login
+   * (tipicamente chamando `signIn`) e devolver `true` em caso de sucesso.
    */
-  enableAutoRelogin(
-    provider: () => Promise<EncryptedAuthEnvelope | null>,
-  ): void {
-    this.reloginProvider = provider;
-    this.http.setUnauthorizedHandler(async () => {
-      const envelope = await this.reloginProvider?.();
-      if (!envelope) return false;
-      try {
-        await this.login(envelope);
-        return true;
-      } catch {
-        return false;
-      }
-    });
+  enableAutoRelogin(relogin: () => Promise<boolean>): void {
+    this.http.setUnauthorizedHandler(relogin);
   }
 
   /** Envia código OTP por e-mail — `/api/auth/otp-send`. */

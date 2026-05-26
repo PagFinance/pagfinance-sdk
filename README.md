@@ -37,24 +37,39 @@ client.setToken(tokenJWT);
 const me = await client.user.me();
 ```
 
-## Modelo de autenticação (token-agnóstico)
+## Modelo de autenticação (challenge–response, sem cripto)
 
-`/api/auth` e `/api/create-payment` usam `ProtocolEncryptor v0.2` + assinatura de
-carteira. **Isso fica fora da SDK.** O app host:
+O login Web3 é um challenge–response (estilo SIWS). O SDK orquestra tudo; o app
+host só fornece um `signer` que assina o desafio com a carteira:
 
-1. assina a mensagem com a carteira e monta o envelope cifrado;
-2. obtém o `tokenJWT` (via `/api/auth`) e o entrega à SDK:
+```ts
+import nacl from 'tweetnacl';
+
+const { tokenJWT } = await client.auth.signIn(
+  { address, blockchain: 'solana' },
+  (challenge) => wallet.signMessage(new TextEncoder().encode(challenge)),
+);
+// tokenJWT já fica salvo no client (tokenStore)
+```
+
+Internamente: `POST /api/auth/challenge` → `signer(challenge)` → `POST /api/auth/verify`.
+Não há criptografia nem chave no cliente — a única prova é a assinatura, e toda a
+lógica (nonce, verificação, emissão do token) vive no servidor. O mesmo contrato
+vale apontando o `baseUrl` para o app hoje ou para um BFF dedicado amanhã.
+
+Token obtido por fora (ou reaproveitado):
 
 ```ts
 client.setToken(tokenJWT);
-// ou transportando o envelope já cifrado:
-const { tokenJWT } = await client.auth.login({ v, iv, data });
 ```
 
 Re-login transparente em 401 (opcional):
 
 ```ts
-client.auth.enableAutoRelogin(async () => buildEncryptedEnvelopeNoHost());
+client.auth.enableAutoRelogin(async () => {
+  await client.auth.signIn({ address, blockchain }, signer);
+  return true;
+});
 ```
 
 ## Recursos
@@ -66,7 +81,7 @@ client.auth.enableAutoRelogin(async () => buildEncryptedEnvelopeNoHost());
 | `receipts` | `get({ type, tx, chain })` — agnóstico (pix/boleto/giftcard) |
 | `kyc` | `naturalProposal`, `legalProposal`, `documentUrl`, `check`, `cpfValidate`, `userData` |
 | `user` | `me` |
-| `auth` | `login`, `setToken`, `getToken`, `clearToken`, `otpSend`, `enableAutoRelogin` |
+| `auth` | `signIn`, `challenge`, `verify`, `setToken`, `getToken`, `clearToken`, `otpSend`, `enableAutoRelogin` |
 
 ## Erros
 
