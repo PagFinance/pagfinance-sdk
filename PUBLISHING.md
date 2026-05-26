@@ -82,11 +82,24 @@ npm version major   # mudanças incompatíveis (0.1.0 -> 1.0.0)
 npm publish
 ```
 
-## 7. (Opcional) Publicação automática via CI
+## 7. Publicação automática via CI
 
-Para publicar automaticamente ao criar uma tag de versão no GitHub, adicione um
-workflow em `.github/workflows/publish.yml` usando um `NPM_TOKEN` (token de
-automação criado em npmjs.com → Access Tokens) salvo nos secrets do repositório.
+Já existe um workflow em `.github/workflows/publish.yml` que publica automaticamente
+ao enviar uma tag de versão (`v*`) para o GitHub. Para habilitar:
+
+1. Crie um **token de automação** em npmjs.com → *Access Tokens* → *Generate New Token*
+   → tipo **Automation**.
+2. Salve-o nos secrets do repositório: GitHub → *Settings* → *Secrets and variables*
+   → *Actions* → *New repository secret*, com o nome `NPM_TOKEN`.
+3. Faça o release criando e enviando a tag:
+
+   ```bash
+   npm version patch        # cria o commit + a tag (ex.: v0.1.1)
+   git push --follow-tags
+   ```
+
+   O push da tag dispara o workflow, que instala dependências, roda o type check,
+   builda e publica no npm.
 
 ## Solução de problemas
 
