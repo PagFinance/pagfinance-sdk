@@ -19,6 +19,7 @@ const SENDER_WALLET = ''; // endereço da carteira pagadora
 const TX_HASH = ''; // hash on-chain, após o host assinar/transmitir
 const ASSET_ID = 1;
 const FIAT_CURRENCY = 'BRL';
+const AMOUNT_BRL = 10; // usado quando o código não traz valor embutido (ex.: chave PIX)
 const BLOCKCHAIN = 'solana';
 // ─────────────────────────────────────────────────────────────────────────────
 
@@ -54,6 +55,10 @@ async function main() {
     return;
   }
 
+  // externalId é gerado pelo client, estável por sessão de invoice (regenera se
+  // o código muda). Mesmo padrão do hook useBffQuote do app.
+  const externalId = `pag_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
+
   // 3. Cotação (autenticada)
   console.log('\n› 3. quote');
   const quote = await client.payments.quote({
@@ -62,7 +67,8 @@ async function main() {
     invoiceTransferType: transfer.type,
     assetId: ASSET_ID,
     fiatCurrency: FIAT_CURRENCY,
-    amount: transfer.amount,
+    amount: transfer.amount || AMOUNT_BRL,
+    externalId,
     sender: SENDER_WALLET,
   });
   console.log('   quoteId:', quote.quoteId);
