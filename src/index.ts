@@ -26,9 +26,11 @@ export {
 // Recursos (tipos auxiliares)
 export {
   AuthResource,
-  type EncryptedAuthEnvelope,
-  type AuthLoginOptions,
+  type AuthChallenge,
   type AuthLoginResult,
+  type WalletSigner,
+  type WalletSignature,
+  type SignInParams,
 } from './resources/AuthResource';
 export { AssetsResource } from './resources/AssetsResource';
 export { PaymentsResource } from './resources/PaymentsResource';
