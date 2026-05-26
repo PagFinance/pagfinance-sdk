@@ -94,7 +94,12 @@ export interface QuoteRequest {
   assetId: number;
   fiatCurrency: string;
   amount: number;
-  externalId?: string;
+  /**
+   * Gerado pelo client, estável por sessão de invoice (ver useBffQuote no app):
+   * `pag_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`. Obrigatório
+   * no BFF.
+   */
+  externalId: string;
 }
 
 export interface QuoteResponse {
