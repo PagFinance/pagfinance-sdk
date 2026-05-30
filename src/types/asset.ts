@@ -46,7 +46,6 @@ export interface AssetType {
   chainName: string;
   oracleId?: string | null;
   coinGeckoId: string;
-  assetCode?: string | null;
   tokenVariant?: TokenVariant | null;
   chainId?: number | null;
   price?: number | null;
