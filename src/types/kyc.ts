@@ -74,16 +74,23 @@ export interface UserSession {
   isCurrentWalletAuthorized?: boolean;
 }
 
+/**
+ * Resposta do BFF `/api/kyc/check`.
+ *
+ * Shape REAL retornado pelo endpoint — NÃO contém o array `registration`.
+ * A documentoscopia / `kyc/document.tsx` deve ler `status` e `canOperate`
+ * diretamente desta resposta.
+ */
 export interface KycCheckResponse {
   ok: boolean;
-  action?: string | null;
-  hasRegistration?: boolean;
   canOperate?: boolean;
+  hasRegistration?: boolean;
   status: string | null;
   level?: KycLevel;
   provider?: string | null;
-  disclosedData?: unknown;
+  action?: string | null;
   verifiedAt?: string | null;
+  disclosedData?: unknown;
 }
 
 export interface CpfValidateResponse {
@@ -97,6 +104,8 @@ export interface CpfValidateResponse {
 export enum ProposalStatus {
   CREATED = 'Created',
   PENDING = 'Pending',
+  // NOTE: "DOCUMENTSCOPY" é um typo histórico de "DOCUMENTOSCOPY". Mantido como
+  // chave canônica para não quebrar consumidores; use o alias abaixo em código novo.
   PENDING_DOCUMENTSCOPY = 'Pending_Documentscopy',
   PROCESSING_DOCUMENTSCOPY = 'Processing_Documentscopy',
   REPROVED = 'Reproved',
