@@ -25,19 +25,19 @@ export type TokenVariant =
   | 'unknown';
 
 export interface AssetMetadata {
-  name: string;
-  symbol: string;
-  description: string;
-  image: string;
-  external_url: string;
-  twitter: string;
+  wrappedKey?: string;
+  name?: string;
+  symbol?: string;
+  description?: string;
+  image?: string;
+  external_url?: string;
 }
 
 export interface AssetType {
   id: number;
   symbol: string;
   name: string;
-  icon: string;
+  icon: string | null;
   address: string;
   decimals: number;
   order: number;
@@ -45,7 +45,7 @@ export interface AssetType {
   wrappedKey?: string | null;
   chainName: string;
   oracleId?: string | null;
-  coinGeckoId: string;
+  coinGeckoId?: string | null;
   tokenVariant?: TokenVariant | null;
   chainId?: number | null;
   price?: number | null;
