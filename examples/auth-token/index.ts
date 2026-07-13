@@ -1,5 +1,5 @@
 /**
- * Como gerar um TOKEN_JWT do PagFinance e usá-lo no SDK — fluxo simplificado
+ * Como gerar um TOKEN_JWT do PagFinance e usá-lo no SDK - fluxo simplificado
  * (challenge–response, sem criptografia).
  *
  * O SDK faz todo o trabalho: pede um desafio, repassa ao seu `signer`, troca a
@@ -21,7 +21,7 @@ const BLOCKCHAIN = 'solana';
 
 function loadKeypair(): nacl.SignKeyPair {
   if (SOLANA_SECRET_KEY) return nacl.sign.keyPair.fromSecretKey(bs58.decode(SOLANA_SECRET_KEY));
-  console.log('⚠️  SOLANA_SECRET_KEY vazio — gerando par efêmero (sem KYC).');
+  console.log('⚠️  SOLANA_SECRET_KEY vazio - gerando par efêmero (sem KYC).');
   return nacl.sign.keyPair();
 }
 

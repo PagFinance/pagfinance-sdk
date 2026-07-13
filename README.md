@@ -4,7 +4,7 @@ SDK cliente, **framework-agnóstico**, para integrar apps externos com a API do
 PagFinance (pagamentos cripto → PIX/boleto/giftcard, KYC e cotações).
 
 Projetada para ser **plugável em qualquer app** (Node 18+, browsers, bundlers) e
-para **não conter nenhum segredo, chave ou lógica de criptografia/assinatura** —
+para **não conter nenhum segredo, chave ou lógica de criptografia/assinatura** -
 toda essa parte permanece no app host, protegendo a propriedade intelectual e a
 segurança do PagFinance.
 
@@ -53,7 +53,7 @@ const { tokenJWT } = await client.auth.signIn(
 ```
 
 Internamente: `POST /api/auth/challenge` → `signer(challenge)` → `POST /api/auth/verify`.
-Não há criptografia nem chave no cliente — a única prova é a assinatura, e toda a
+Não há criptografia nem chave no cliente - a única prova é a assinatura, e toda a
 lógica (nonce, verificação, emissão do token) vive no servidor. O mesmo contrato
 vale apontando o `baseUrl` para o app hoje ou para um BFF dedicado amanhã.
 
@@ -78,7 +78,7 @@ client.auth.enableAutoRelogin(async () => {
 | --- | --- |
 | `assets` | `acceptedCryptos`, `gatewayConfig`, `assets`, `getAssetPrice` |
 | `payments` | `validateCode`, `quote`, `create`, `submit`, `list`, `get` |
-| `receipts` | `get({ type, tx, chain })` — agnóstico (pix/boleto/giftcard) |
+| `receipts` | `get({ type, tx, chain })` - agnóstico (pix/boleto/giftcard) |
 | `kyc` | `naturalProposal`, `legalProposal`, `documentUrl`, `check`, `cpfValidate`, `userData` |
 | `user` | `me` |
 | `auth` | `signIn`, `challenge`, `verify`, `setToken`, `getToken`, `clearToken`, `otpSend`, `enableAutoRelogin` |
@@ -103,7 +103,7 @@ try {
 
 ## Exemplo executável
 
-Veja `examples/transaction-flow` — fluxo ponta-a-ponta real (cotação → criação →
+Veja `examples/transaction-flow` - fluxo ponta-a-ponta real (cotação → criação →
 recibo) usando um `TOKEN_JWT` de variável de ambiente.
 
 ```bash

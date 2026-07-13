@@ -77,7 +77,7 @@ export interface UserSession {
 /**
  * Resposta do BFF `/api/kyc/check`.
  *
- * Shape REAL retornado pelo endpoint — NÃO contém o array `registration`.
+ * Shape REAL retornado pelo endpoint - NÃO contém o array `registration`.
  * A documentoscopia / `kyc/document.tsx` deve ler `status` e `canOperate`
  * diretamente desta resposta.
  */

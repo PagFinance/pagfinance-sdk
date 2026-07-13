@@ -41,7 +41,7 @@ async function main() {
   console.log('   price:', price);
 
   if (!PAYMENT_CODE) {
-    console.log('\n(PAYMENT_CODE vazio — encerrando após os passos públicos)');
+    console.log('\n(PAYMENT_CODE vazio - encerrando após os passos públicos)');
     return;
   }
 
@@ -51,7 +51,7 @@ async function main() {
   console.log('   transfer:', transfer);
 
   if (!TOKEN_JWT || !SENDER_WALLET) {
-    console.log('\n(TOKEN_JWT/SENDER_WALLET vazios — encerrando antes da cotação autenticada)');
+    console.log('\n(TOKEN_JWT/SENDER_WALLET vazios - encerrando antes da cotação autenticada)');
     return;
   }
 
@@ -81,7 +81,7 @@ async function main() {
   // 5. PLACEHOLDER (app host): assinar e transmitir a instrução na blockchain.
   console.log('\n› 5. [host] assinar + transmitir on-chain (fora do SDK)');
 
-  // 6. Submeter (se o app/BFF expõe /api/payment/submit) — opcional
+  // 6. Submeter (se o app/BFF expõe /api/payment/submit) - opcional
   if (TX_HASH) {
     console.log('\n› 6. submit');
     const payment = await client.payments.submit({
@@ -97,7 +97,7 @@ async function main() {
     const receipt = await client.receipts.get({ type: transfer.type, tx: TX_HASH });
     console.log('   receipt:', receipt);
   } else {
-    console.log('\n(TX_HASH vazio — pulei submit/receipt)');
+    console.log('\n(TX_HASH vazio - pulei submit/receipt)');
   }
 }
 

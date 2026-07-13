@@ -5,7 +5,7 @@ import { type UserSession } from '../types/kyc';
 export class UserResource {
   constructor(private readonly http: HttpClient) {}
 
-  /** Sessão atual (auth + wallet + KYC) — `/api/me`. */
+  /** Sessão atual (auth + wallet + KYC) - `/api/me`. */
   me(
     params: {
       loginProvider?: 'login-email' | 'login-wallet';

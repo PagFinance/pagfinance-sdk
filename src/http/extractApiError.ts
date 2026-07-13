@@ -1,4 +1,4 @@
-// Portado de packages/core/src/lib/http/extractApiError.ts — função pura, sem
+// Portado de packages/core/src/lib/http/extractApiError.ts - função pura, sem
 // dependências. Entende os dois envelopes de erro do BFF/app PagFinance.
 
 export type ApiIssue = {

@@ -25,7 +25,7 @@ export class PaymentsResource {
     private readonly config: ResolvedConfig,
   ) {}
 
-  /** Valida e classifica um código (pix/boleto/doc/ted) — `/api/validate-code`. */
+  /** Valida e classifica um código (pix/boleto/doc/ted) - `/api/validate-code`. */
   validateCode(input: ValidateCodeRequest): Promise<Transfer> {
     return this.http.request<Transfer>('/api/validate-code', {
       method: 'POST',
@@ -34,7 +34,7 @@ export class PaymentsResource {
     });
   }
 
-  /** Cotação autoritativa (taxas + valor em cripto) — `/api/payment/quote`. */
+  /** Cotação autoritativa (taxas + valor em cripto) - `/api/payment/quote`. */
   quote(input: QuoteRequest): Promise<QuoteResponse> {
     return this.http.request<QuoteResponse>('/api/payment/quote', {
       method: 'POST',
@@ -42,7 +42,7 @@ export class PaymentsResource {
     });
   }
 
-  /** Cria a instrução de pagamento a partir de um `quoteId` — `/api/payment/create`. */
+  /** Cria a instrução de pagamento a partir de um `quoteId` - `/api/payment/create`. */
   create(input: CreatePaymentRequest): Promise<CreatePaymentResponse> {
     return this.http.request<CreatePaymentResponse>('/api/payment/create', {
       method: 'POST',
@@ -65,7 +65,7 @@ export class PaymentsResource {
     });
   }
 
-  /** Lista pagamentos do usuário/carteira — `/api/wallet-lists`. */
+  /** Lista pagamentos do usuário/carteira - `/api/wallet-lists`. */
   list(
     params: { format?: PaymentListFormat; blockchain?: string } = {},
   ): Promise<PaymentListResult> {

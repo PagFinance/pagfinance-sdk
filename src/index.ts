@@ -1,4 +1,4 @@
-// @pagfinance/sdk — SDK cliente para integração com a API do PagFinance.
+// @pagfinance/sdk - SDK cliente para integração com a API do PagFinance.
 // Token-agnóstica e livre de criptografia/segredos.
 
 export { PagFinanceClient } from './PagFinanceClient';

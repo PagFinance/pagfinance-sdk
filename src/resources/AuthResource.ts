@@ -53,7 +53,7 @@ export interface SignInParams {
  * ```
  * O SDK chama `/challenge`, repassa o desafio ao `signer`, chama `/verify` e
  * guarda o `tokenJWT`. Toda a lógica (nonce, verificação, emissão) vive no
- * servidor — o mesmo contrato vale para o app hoje ou um BFF dedicado amanhã.
+ * servidor - o mesmo contrato vale para o app hoje ou um BFF dedicado amanhã.
  */
 export class AuthResource {
   constructor(
@@ -139,7 +139,7 @@ export class AuthResource {
     this.http.setUnauthorizedHandler(relogin);
   }
 
-  /** Envia código OTP por e-mail — `/api/auth/otp-send`. */
+  /** Envia código OTP por e-mail - `/api/auth/otp-send`. */
   otpSend(email: string): Promise<{ ok: boolean; message?: string }> {
     return this.http.request('/api/auth/otp-send', {
       method: 'POST',

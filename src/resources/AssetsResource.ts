@@ -22,7 +22,7 @@ export class AssetsResource {
     });
   }
 
-  /** Alias de `gatewayConfig` — chains/cryptos aceitas. */
+  /** Alias de `gatewayConfig` - chains/cryptos aceitas. */
   acceptedCryptos(chain?: string): Promise<GatewayConfigType> {
     return this.gatewayConfig(chain);
   }
