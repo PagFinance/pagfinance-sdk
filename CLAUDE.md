@@ -258,7 +258,7 @@ chamando direto). O SDK é deliberadamente crypto-free.
 - `package.json` aponta `main`/`module`/`types`/`exports` para `dist/*`, e
   `files: ["dist"]` — só `dist/` vai pro npm.
 - `sideEffects: false` para tree-shaking.
-- Versão atual: **0.2.0**. Política: 0.x é pré-estável; mudanças aditivas =
+- Versão atual: **0.3.0**. Política: 0.x é pré-estável; mudanças aditivas =
   minor; quebras = nota de migração no README.
 
 Verificação local:
@@ -368,13 +368,17 @@ público — qualquer mudança lá será sobrescrita pelo próximo release.
 Fluxo automatizado via `.github/workflows/sdk-release.yml`:
 
 ```bash
-# 1. bump versão
-pnpm --filter @pagfinance/sdk version 0.3.0
-git commit -am "chore(sdk): 0.3.0"
+# 1. Bump versão no package.json (este comando atualiza o campo "version"
+#    em packages/sdk/package.json automaticamente - é obrigatório porque o
+#    CI valida que a tag bate com a versão do package.json)
+pnpm --filter @pagfinance/sdk version <NOVA_VERSAO>
 
-# 2. tag → CI cuida do resto
-git tag sdk-v0.3.0
-git push origin HEAD sdk-v0.3.0
+# 2. Commit da alteração do package.json
+git commit -am "chore(sdk): <NOVA_VERSAO>"
+
+# 3. Tag + push - o CI cuida do subtree split, mirror e npm publish
+git tag sdk-v<NOVA_VERSAO>
+git push origin HEAD sdk-v<NOVA_VERSAO>
 ```
 
 O workflow valida que `tag === packages/sdk/package.json:version`, faz
