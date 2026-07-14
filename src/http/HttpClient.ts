@@ -14,6 +14,14 @@ export interface RequestOptions {
   skipAuth?: boolean;
   /** Headers extras (ex.: `blockchain`, `login-provider`, `id-token`). */
   headers?: Record<string, string | undefined>;
+  /** Sinal de abort para cancelar o request em flight. */
+  signal?: AbortSignal;
+  /**
+   * Override do Bearer para esta chamada (ignora o `tokenStore`). Útil quando o
+   * app precisa autenticar pontualmente com outro token (ex.: Firebase id-token
+   * para o `/api/kyc/check`). `skipAuth` continua tendo prioridade.
+   */
+  authToken?: string;
 }
 
 /**
@@ -49,7 +57,9 @@ export class HttpClient {
     allowRefresh: boolean,
   ): Promise<T> {
     const url = this.buildUrl(path, options.query);
-    const token = options.skipAuth ? null : this.config.tokenStore.get();
+    const token = options.skipAuth
+      ? null
+      : (options.authToken ?? this.config.tokenStore.get());
 
     let res: Response;
     try {
@@ -62,8 +72,12 @@ export class HttpClient {
           extra: options.headers,
         }),
         body: options.body !== undefined ? JSON.stringify(options.body) : undefined,
+        signal: options.signal,
       });
     } catch (e) {
+      // Repassa AbortError sem embrulhar para o caller distinguir cancelamento
+      // de falha de rede (padrão `err.name === 'AbortError'`).
+      if (e instanceof Error && e.name === 'AbortError') throw e;
       throw PagFinanceError.local(
         `Network error: ${e instanceof Error ? e.message : String(e)}`,
         'NETWORK_ERROR',

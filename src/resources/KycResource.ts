@@ -35,9 +35,17 @@ export class KycResource {
     });
   }
 
-  /** Status de KYC do usuário autenticado - `/api/kyc/check`. */
-  check(): Promise<KycCheckResponse> {
-    return this.http.request<KycCheckResponse>('/api/kyc/check');
+  /**
+   * Status de KYC do usuário autenticado — `/api/kyc/check`.
+   *
+   * Aceita override de Bearer para esta chamada e o header `id-token` opcional,
+   * permitindo o fluxo do app que autentica com wallet JWT OU Firebase id-token.
+   */
+  check(opts: { idToken?: string; bearer?: string } = {}): Promise<KycCheckResponse> {
+    return this.http.request<KycCheckResponse>('/api/kyc/check', {
+      authToken: opts.bearer,
+      headers: { 'id-token': opts.idToken },
+    });
   }
 
   /** Validação de CPF - `/api/kyc/cpf-validate`. */

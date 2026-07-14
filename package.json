@@ -1,6 +1,6 @@
 {
   "name": "@pagfinance/sdk",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Client SDK to integrate external apps with the PagFinance payment/KYC API. Token-agnostic and crypto-free.",
   "license": "UNLICENSED",
   "private": false,

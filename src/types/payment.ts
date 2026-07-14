@@ -100,11 +100,29 @@ export interface QuoteRequest {
    * no BFF.
    */
   externalId: string;
+  /** Nível KYC do usuário, ex.: `KYC-1`, `KYC-2`. Resolve a faixa de fee no BFF. */
+  kycLevel?: string;
+  /** Código de referral first-click, preservando atribuição no snapshot do BFF. */
+  referCode?: string;
+}
+
+export interface QuotePriceContext {
+  pair: string;
+  price: number;
+  priceAfterDiscount: number;
+  discountAppliedBps: number;
+  feeFloor: number;
+  feePercentApplied: number;
+  kycLevel: string;
+  updated_at: string;
 }
 
 export interface QuoteResponse {
   quoteId: string;
   valuesAndFees?: PaymentValuesType;
+  expiresAt?: string;
+  ttlSeconds?: number;
+  priceContext?: QuotePriceContext;
   [key: string]: unknown;
 }
 

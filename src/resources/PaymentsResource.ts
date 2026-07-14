@@ -34,11 +34,15 @@ export class PaymentsResource {
     });
   }
 
-  /** Cotação autoritativa (taxas + valor em cripto) - `/api/payment/quote`. */
-  quote(input: QuoteRequest): Promise<QuoteResponse> {
+  /** Cotação autoritativa (taxas + valor em cripto) — `/api/payment/quote`. */
+  quote(
+    input: QuoteRequest,
+    opts: { signal?: AbortSignal } = {},
+  ): Promise<QuoteResponse> {
     return this.http.request<QuoteResponse>('/api/payment/quote', {
       method: 'POST',
       body: input,
+      signal: opts.signal,
     });
   }
 
