@@ -41,6 +41,21 @@ export interface SignInParams {
   idToken?: string;
 }
 
+/** Resposta de `otpSend`. Erros são lançados como `PagFinanceError`. */
+export interface OtpSendResult {
+  ok: boolean;
+  message?: string;
+}
+
+/** Resposta de `otpVerify`. Erros são lançados como `PagFinanceError`. */
+export interface OtpVerifyResult {
+  ok: boolean;
+  /** Custom token do Firebase para `signInWithCustomToken` no app host. */
+  customToken: string;
+  /** UID do usuário Firebase. */
+  uid: string;
+}
+
 /**
  * Autenticação Web3 via challenge–response (estilo SIWS), sem criptografia.
  *
@@ -139,12 +154,33 @@ export class AuthResource {
     this.http.setUnauthorizedHandler(relogin);
   }
 
-  /** Envia código OTP por e-mail - `/api/auth/otp-send`. */
-  otpSend(email: string): Promise<{ ok: boolean; message?: string }> {
-    return this.http.request('/api/auth/otp-send', {
+  /**
+   * Envia código OTP por e-mail - `/api/auth/otp-send`.
+   *
+   * A lógica (geração, rate limit, persistência e envio) roda no servidor
+   * (BFF). Rate limit / e-mail inválido são lançados como `PagFinanceError`.
+   */
+  otpSend(email: string): Promise<OtpSendResult> {
+    return this.http.request<OtpSendResult>('/api/auth/otp-send', {
       method: 'POST',
       skipAuth: true,
       body: { email },
+    });
+  }
+
+  /**
+   * Verifica o código OTP recebido por e-mail - `/api/auth/otp-verify`.
+   *
+   * Em caso de sucesso devolve o `customToken` do Firebase; a troca por uma
+   * sessão (via `signInWithCustomToken`) é responsabilidade do app host - a
+   * SDK é agnóstica a Firebase. Código inválido/expirado, excesso de
+   * tentativas e rate limit são lançados como `PagFinanceError`.
+   */
+  otpVerify(email: string, code: string): Promise<OtpVerifyResult> {
+    return this.http.request<OtpVerifyResult>('/api/auth/otp-verify', {
+      method: 'POST',
+      skipAuth: true,
+      body: { email, code },
     });
   }
 }

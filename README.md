@@ -81,7 +81,7 @@ client.auth.enableAutoRelogin(async () => {
 | `receipts` | `get({ type, tx, chain })` - agnóstico (pix/boleto/giftcard) |
 | `kyc` | `naturalProposal`, `legalProposal`, `documentUrl`, `check`, `cpfValidate`, `userData` |
 | `user` | `me` |
-| `auth` | `signIn`, `challenge`, `verify`, `setToken`, `getToken`, `clearToken`, `otpSend`, `enableAutoRelogin` |
+| `auth` | `signIn`, `challenge`, `verify`, `setToken`, `getToken`, `clearToken`, `otpSend`, `otpVerify`, `enableAutoRelogin` |
 
 ## Erros
 

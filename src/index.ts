@@ -31,6 +31,8 @@ export {
   type WalletSigner,
   type WalletSignature,
   type SignInParams,
+  type OtpSendResult,
+  type OtpVerifyResult,
 } from './resources/AuthResource';
 export { AssetsResource } from './resources/AssetsResource';
 export { PaymentsResource } from './resources/PaymentsResource';
